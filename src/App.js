@@ -4,40 +4,49 @@ import moment from 'moment'
 import fire from './fire'
 import 'antd/dist/antd.css';
 
+let ultraResult
+const firebaseUltraRef = fire
+  .database()
+  .ref("ultra")
+  .orderByKey();
 
+firebaseUltraRef.on("value", snapshot => {
+  const data = snapshot.val()
+  ultraResult = data
+});
 class App extends Component {
   state = {
     value: "",
     dateAsID: "",
-    ultraResult: [],
     numbers: [],
     day: null,
     month: null,
     specDate: null
   }
 
-  componentDidMount() {
-    //Get data from firebase using reference
-    let ultraResult
-    const firebaseUltraRef = fire
-      .database()
-      .ref("ultra")
-      .orderByKey();
-
-    firebaseUltraRef.on("value", snapshot => {
-      const data = snapshot.val()
-      ultraResult = data
-    });
-    this.setState({ ultraResult })
-  }
-
   inputChange = (e) => {
     let value, numbers, day, month, specDate, dateAsID
     const newValue = e.target.value
+    value = e.target.value.split(/\s+/g)
+
+    //console.log('val', value)
+
+    const test = value.filter((val, index) => {
+      if (val.includes("/") || val.includes("-")) {
+        if (val !== "6/58") {
+          return val
+        }
+      }
+    })
+
+    console.log("test", test)
+
     if (e.target.value.length === 27) {
 
       //To split the entered set of numbers from date
       value = e.target.value.split(/\s+/g)
+
+      console.log('val', value)
 
       //To split the set of numbers and remove "-" sign
       numbers = value[0].split("-")
@@ -50,38 +59,36 @@ class App extends Component {
       specDate = moment(value[1]).date()
 
       dateAsID = value[1].replace(/\//g, "-")
-      console.log("date", dateAsID)
       this.setState({ numbers, day, month, specDate, dateAsID })
     }
     this.setState({ value: newValue })
   }
 
   handleSave = () => {
-    const { ultraResult, numbers, day, month, specDate, dateAsID } = this.state
+    /* let dupChecker = false
+    const { numbers, day, month, specDate, dateAsID } = this.state
     const result = {
       numbers, day, month, specDate
     }
 
-    console.log('res', ultraResult)
+    console.log(dupChecker)
 
-    for(let index in ultraResult){
-      console.log(index)
-    }
-
-    //fire.database().ref(`${"ultra"}/${dateAsID}`).set(result)
-    /* if (ultraResult) {
-      ultraResult.map((val, index) => {
-        if (val.inputValue == inputValue) {
-          console.log('duplicate!')
-        } else {
-          console.log("added")
-
-          fire.database().ref("ultra").set(ultraResult)
-          this.setState({ value: "" })
-        }
-      })
+    for (let index in ultraResult) {
+      if (dateAsID == index) {
+        dupChecker = true
+      }
     } */
 
+    //fire.database().ref(`${"ultra"}/${dateAsID}`).set(result)
+
+    /* console.log(dupChecker)
+
+    if (dupChecker) {
+      console.log("duplicate!")
+    } else {
+      fire.database().ref(`${"ultra"}/${dateAsID}`).set(result)
+      this.setState({ value: "" })
+    } */
   }
 
   render() {
