@@ -7,8 +7,8 @@ import 'antd/dist/antd.css';
 
 class App extends Component {
   state = {
-    inputValue: "",
     value: "",
+    dateAsID: "",
     ultraResult: [],
     numbers: [],
     day: null,
@@ -32,10 +32,9 @@ class App extends Component {
   }
 
   inputChange = (e) => {
-    let inputValue, value, numbers, day, month, specDate
+    let value, numbers, day, month, specDate, dateAsID
     const newValue = e.target.value
     if (e.target.value.length === 27) {
-      inputValue = e.target.value
 
       //To split the entered set of numbers from date
       value = e.target.value.split(/\s+/g)
@@ -49,17 +48,27 @@ class App extends Component {
       //Months starts at 0 such as January is to 0 December is to 11
       month = moment(value[1]).month()
       specDate = moment(value[1]).date()
-      this.setState({ numbers, day, month, specDate, inputValue })
+
+      dateAsID = value[1].replace(/\//g, "-")
+      console.log("date", dateAsID)
+      this.setState({ numbers, day, month, specDate, dateAsID })
     }
     this.setState({ value: newValue })
   }
 
   handleSave = () => {
-    const { ultraResult, numbers, day, month, specDate, inputValue } = this.state
+    const { ultraResult, numbers, day, month, specDate, dateAsID } = this.state
     const result = {
-      numbers, day, month, specDate, inputValue
+      numbers, day, month, specDate
     }
-    fire.database().ref("ultra").set(result)
+
+    console.log('res', ultraResult)
+
+    for(let index in ultraResult){
+      console.log(index)
+    }
+
+    //fire.database().ref(`${"ultra"}/${dateAsID}`).set(result)
     /* if (ultraResult) {
       ultraResult.map((val, index) => {
         if (val.inputValue == inputValue) {
