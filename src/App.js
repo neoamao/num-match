@@ -24,14 +24,54 @@ class App extends Component {
     specDate: null
   }
 
-  inputChange = (e) => {
-    let value, numbers, day, month, specDate, dateAsID
+  /* swertres */
+     inputChange = (e) => {
+    const results = []
     const newValue = e.target.value
-    value = e.target.value.split(/\s+/g)
+    const value = e.target.value.split(/\s+/g)
 
-    //console.log('val', value)
+    const polishedResults = value.filter((val, index) => {
+      if (val.includes("/") || val.includes("-")) {
+        return val
+      }
+    })
 
-    const test = value.filter((val, index) => {
+    while (polishedResults.length != 0) {
+      let numbers, day, month, specDate, dateAsID
+      const removed = polishedResults.splice(0,2)
+      numbers = removed[0]
+
+      dateAsID = removed[1].replace(/\//g, "-")
+
+      day = moment(dateAsID).format("dddd")
+
+      month = moment(dateAsID).format('MMMM')
+
+      
+      specDate = moment(removed[1]).date()
+
+      const result = {
+        numbers, day, month, specDate, dateAsID
+      }
+      results.push(result)
+    }
+
+    results.map((val, index) => {
+      if(val.month == "October" && val.specDate == 17) {
+        console.log("val", val)
+        return val
+      }
+    })
+    this.setState({ value: newValue })
+  }
+
+   /* per number  */
+   /* inputChange = (e) => {
+    const results = []
+    const newValue = e.target.value
+    const value = e.target.value.split(/\s+/g)
+
+    const polishedResults = value.filter((val, index) => {
       if (val.includes("/") || val.includes("-")) {
         if (val !== "6/58") {
           return val
@@ -39,30 +79,126 @@ class App extends Component {
       }
     })
 
-    console.log("test", test)
+    while (polishedResults.length != 0) {
+      let numbers, day, month, specDate, year, dateAsID
+      const removed = polishedResults.splice(0,2)
+      numbers = removed[0].split("-")
 
-    if (e.target.value.length === 27) {
+      dateAsID = removed[1].replace(/\//g, "-")
 
-      //To split the entered set of numbers from date
-      value = e.target.value.split(/\s+/g)
+      day = moment(dateAsID).format("dddd")
 
-      console.log('val', value)
+      month = moment(dateAsID).format('MMMM')
+      
+      year = moment(dateAsID).format('YYYY')
+      
+      specDate = moment(removed[1]).date()
 
-      //To split the set of numbers and remove "-" sign
-      numbers = value[0].split("-")
-
-      //0 = Sunday, 2 = Tuesday, 5 = Friday
-      day = moment(value[1]).day()
-
-      //Months starts at 0 such as January is to 0 December is to 11
-      month = moment(value[1]).month()
-      specDate = moment(value[1]).date()
-
-      dateAsID = value[1].replace(/\//g, "-")
-      this.setState({ numbers, day, month, specDate, dateAsID })
+      const result = {
+        numbers, day, month, specDate, year, dateAsID
+      }
+      results.push(result)
     }
+    let counter, matchingNum
+    const val = [
+      "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11",
+      "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22",
+      "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33",
+      "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44",
+      "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55",
+      "56", "57", "58"
+    ]
+    const numCounts = []
+
+    val.map((num, i)=>{
+      counter = 0
+      results.map(res => {
+        if(res.year <= "2018" && res.day == "Sunday") {
+          res.numbers.map(comp =>{
+            if(num == comp) {
+              counter++
+            }
+            return 0
+          })
+        }
+        return 0
+      })
+      
+      const count = {
+        num,
+        counter
+      }
+      numCounts.push(count)
+      return 0;
+    })
+
+    numCounts.sort((a, b) =>{
+      return a.counter - b.counter
+    })
+    console.log("counts", numCounts)
     this.setState({ value: newValue })
-  }
+  }   */
+
+  /* 6/58 */
+   /* inputChange = (e) => {
+    const results = []
+    const newValue = e.target.value
+    const value = e.target.value.split(/\s+/g)
+
+    const polishedResults = value.filter((val, index) => {
+      if (val.includes("/") || val.includes("-")) {
+        if (val !== "6/58") {
+          return val
+        }
+      }
+    })
+
+    while (polishedResults.length != 0) {
+      let numbers, day, month, specDate, dateAsID
+      const removed = polishedResults.splice(0,2)
+      numbers = removed[0].split("-")
+
+      dateAsID = removed[1].replace(/\//g, "-")
+
+      day = moment(dateAsID).format("dddd")
+
+      month = moment(dateAsID).format('MMMM')
+
+      
+      specDate = moment(removed[1]).date()
+
+      const result = {
+        numbers, day, month, specDate, dateAsID
+      }
+      results.push(result)
+    }
+    let counter, matchingNum
+    let val = ["17", "18", "12", "27", "36", "54"]
+    //results.map((val, index) => { 
+      results.map((value, i)=>{
+        counter = 0
+        matchingNum = []
+        val.map(num => {
+          value.numbers.map(comp =>{
+            if(num == comp) {
+              counter++
+              matchingNum.push(num)
+            }
+            return 0
+          })
+          return 0
+        })
+        if(counter >= 3 && value.dateAsID != val.dateAsID) {
+          console.log("matched", val)
+          console.log("matched with", value)
+          console.log("count", counter, matchingNum)
+        }
+        return 0;
+      })
+      //return 0; 
+    //}) 
+    this.setState({ value: newValue })
+  } */
 
   handleSave = () => {
     /* let dupChecker = false
