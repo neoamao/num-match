@@ -1,19 +1,9 @@
 import React, { Component } from 'react';
-import { Input, Button, Card, Select } from 'antd'
-import moment from 'moment'
+import InputOptions from './InputOptions'
+import TableFilter from './TableFilter';
 import fire from './fire'
 import 'antd/dist/antd.css';
-
-let ultraResult
-const firebaseUltraRef = fire
-  .database()
-  .ref("ultra")
-  .orderByKey();
-
-firebaseUltraRef.on("value", snapshot => {
-  const data = snapshot.val()
-  ultraResult = data
-});
+  
 class App extends Component {
   state = {
     value: "",
@@ -21,48 +11,35 @@ class App extends Component {
     numbers: [],
     day: null,
     month: null,
-    specDate: null
+    specDate: null,
+    results: [],
+    ultraResults: null,
+    tresResults: null
   }
 
-  /* swertres */
-     inputChange = (e) => {
-    const results = []
-    const newValue = e.target.value
-    const value = e.target.value.split(/\s+/g)
+  componentDidMount() {
+    let ultraResults, tresResults
+    const firebaseUltraRef = fire
+      .database()
+      .ref("ultra")
+      .orderByKey();
 
-    const polishedResults = value.filter((val, index) => {
-      if (val.includes("/") || val.includes("-")) {
-        return val
-      }
-    })
+    firebaseUltraRef.on("value", snapshot => {
+      const data = snapshot.val()
+      ultraResults = data
+      this.setState({ ultraResults})
+    });
 
-    while (polishedResults.length != 0) {
-      let numbers, day, month, specDate, dateAsID
-      const removed = polishedResults.splice(0,2)
-      numbers = removed[0]
+    const firebaseTresRef = fire
+      .database()
+      .ref("tres")
+      .orderByKey();
 
-      dateAsID = removed[1].replace(/\//g, "-")
-
-      day = moment(dateAsID).format("dddd")
-
-      month = moment(dateAsID).format('MMMM')
-
-      
-      specDate = moment(removed[1]).date()
-
-      const result = {
-        numbers, day, month, specDate, dateAsID
-      }
-      results.push(result)
-    }
-
-    results.map((val, index) => {
-      if(val.month == "October" && val.specDate == 17) {
-        console.log("val", val)
-        return val
-      }
-    })
-    this.setState({ value: newValue })
+      firebaseTresRef.on("value", snapshot => {
+        const data = snapshot.val()
+        tresResults = data
+        this.setState({ tresResults})
+    });
   }
 
    /* per number  */
@@ -200,49 +177,24 @@ class App extends Component {
     this.setState({ value: newValue })
   } */
 
-  handleSave = () => {
-    /* let dupChecker = false
-    const { numbers, day, month, specDate, dateAsID } = this.state
-    const result = {
-      numbers, day, month, specDate
-    }
-
-    console.log(dupChecker)
-
-    for (let index in ultraResult) {
-      if (dateAsID == index) {
-        dupChecker = true
-      }
-    } */
-
-    //fire.database().ref(`${"ultra"}/${dateAsID}`).set(result)
-
-    /* console.log(dupChecker)
-
-    if (dupChecker) {
-      console.log("duplicate!")
+  addToFirebase = (selectedInput, results) => {
+    if(selectedInput === "six") {
+      fire.database().ref(`${"ultra"}`).set(results)
     } else {
-      fire.database().ref(`${"ultra"}/${dateAsID}`).set(result)
-      this.setState({ value: "" })
-    } */
+      fire.database().ref(`${"tres"}/${selectedInput}`).set(results)
+    }
   }
 
   render() {
-    const Option = Select.Option
+    const { ultraResults, tresResults } = this.state
     return (
-      <Card>
-        {this.state.ultraResult}
-        <Input size="small" onChange={this.inputChange} value={this.state.value} />
-        <Button type="primary" onClick={this.handleSave}> Save </Button>
-        <p>{this.state.newValue}</p>
-
-        Day:
-        <Select defaultValue="Select day">
-          <Option value="0">Sunday</Option>
-          <Option value="2">Tuesday</Option>
-          <Option value="5">Friday</Option>
-        </Select>
-      </Card>
+      <div>
+        <InputOptions addToFirebase={this.addToFirebase}/>
+        <TableFilter
+          ultraResults={ultraResults}
+          tresResults={tresResults}
+        />
+      </div>
     );
   }
 }
